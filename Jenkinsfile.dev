@@ -3,14 +3,14 @@ pipeline {
 
     environment {
         DOCKERFILE_PATH = '.'
-        IMAGE_NAME = 'Dockerfile'
+        
         WORKSPACE_PATH = 'var/lib/jenkins/workspace/docker'
     }
 
     stages {
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ."
+                sh "docker build -t ${DOCKERFILE_PATH} -f ${DOCKERFILE_PATH}/Dockerfile ."
             }
         }
     }
