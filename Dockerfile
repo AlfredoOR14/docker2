@@ -22,7 +22,7 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /opt/app
 
 # Exponer el puerto 8080
-EXPOSE 8080
+EXPOSE 9090
 
 # Copiar el archivo JAR generado desde la etapa de compilación
 COPY --from=builder /opt/app/target/*.jar /opt/app/app.jar
