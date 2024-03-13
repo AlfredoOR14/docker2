@@ -1,5 +1,5 @@
 # Utiliza una imagen base de AdoptOpenJDK con la versión 17
-FROM adoptopenjdk:17-jdk-jammy
+FROM openjdk:17-jdk
 
 # Establece el directorio de trabajo en /opt/app
 WORKDIR /opt/app
