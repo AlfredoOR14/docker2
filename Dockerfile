@@ -1,24 +1,26 @@
-# Utiliza una imagen base de AdoptOpenJDK con la versión 17
-FROM openjdk:17-jdk
+# Usa una imagen base con OpenJDK 17 para Windows
+FROM openjdk:17-windowsservercore
 
-# Establece el directorio de trabajo en /opt/app
+# Establece el directorio de trabajo en la imagen
 WORKDIR /opt/app
 
-# Copia los archivos necesarios para la instalación de dependencias
+# Copia los archivos de Maven
 COPY .mvn/ .mvn
+
+# Copia el script Maven Wrapper y el archivo de proyecto
 COPY mvnw pom.xml ./
 
-# Descarga las dependencias de Maven utilizando el Wrapper Maven
-RUN ./mvnw dependency:go-offline
+# Ejecuta el script Maven Wrapper para descargar las dependencias
+RUN powershell -Command ./mvnw dependency:go-offline
 
 # Copia el resto de la aplicación
-COPY ./src ./src
+COPY src ./src
 
 # Compila la aplicación
-RUN ./mvnw clean install
+RUN powershell -Command ./mvnw package -DskipTests
 
-# Expone el puerto 8080 (ajusta según sea necesario)
+# Expone el puerto 8080 en la imagen
 EXPOSE 8080
 
-# Comando para ejecutar la aplicación cuando se inicie el contenedor
-CMD ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"]
+# Comando para ejecutar la aplicación cuando se inicia el contenedor
+CMD ["java", "-jar", "target/demo.jar"]
