@@ -6,6 +6,9 @@ WORKDIR /opt/app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# Cambiar permisos para mvnw
+RUN chmod +x mvnw
+
 # Descargar las dependencias de Maven
 RUN ./mvnw dependency:go-offline
 
