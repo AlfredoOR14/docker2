@@ -9,8 +9,8 @@ pipeline {
 
     stages {
         stage('Build Docker Image') {
-            steps {
-                sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}\\Dockerfile ."
+           steps {
+                sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ."
             }
         }
         stage('Extract JAR from Image') {
@@ -20,6 +20,8 @@ pipeline {
                     def tempContainerId = bat(script: "docker create ${IMAGE_NAME}", returnStatus: true).trim()
                     // Copiar el archivo JAR desde el contenedor a la ruta específica en el workspace
                     sh "docker cp ${tempContainerId}:/opt/app/*.jar ${WORKSPACE_PATH}"
+                    // Esperar 1 minuto
+                    sleep time: 60, unit: 'SECONDS'
                     // Eliminar el contenedor temporal
                     sh "docker rm ${tempContainerId}"
                 }
@@ -27,3 +29,4 @@ pipeline {
         }
     }
 }
+
