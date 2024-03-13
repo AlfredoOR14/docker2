@@ -1,13 +1,24 @@
-FROM eclipse-temurin:17-jdk-jammy as builder
+# Utiliza una imagen base de AdoptOpenJDK con la versión 17
+FROM adoptopenjdk:17-jdk-jammy
+
+# Establece el directorio de trabajo en /opt/app
 WORKDIR /opt/app
+
+# Copia los archivos necesarios para la instalación de dependencias
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
-RUN mvn dependency:go-offline
+
+# Descarga las dependencias de Maven utilizando el Wrapper Maven
+RUN ./mvnw dependency:go-offline
+
+# Copia el resto de la aplicación
 COPY ./src ./src
+
+# Compila la aplicación
 RUN ./mvnw clean install
- 
-FROM eclipse-temurin:17-jre-jammy
-WORKDIR /opt/app
+
+# Expone el puerto 8080 (ajusta según sea necesario)
 EXPOSE 8080
-COPY --from=builder /opt/app/target/*.jar /opt/app/*.jar
-ENTRYPOINT ["java", "-jar", "/opt/app/*.jar" ]
+
+# Comando para ejecutar la aplicación cuando se inicie el contenedor
+CMD ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"]
