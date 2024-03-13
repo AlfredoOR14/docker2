@@ -11,7 +11,8 @@ COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
 # Ejecuta el script Maven Wrapper para descargar las dependencias
-RUN powershell -Command ./mvnw dependency:go-offline
+# Ejecuta el script Maven Wrapper para descargar las dependencias
+RUN .\mvnw.cmd dependency:go-offline
 
 # Copia el resto de la aplicación
 COPY src ./src
