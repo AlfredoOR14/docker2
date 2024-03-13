@@ -5,7 +5,6 @@ pipeline {
         DOCKERFILE_PATH = '.'
         IMAGE_NAME = 'demo2'
         WORKSPACE_PATH = '/var/lib/jenkins/workspace/docker'
-        JAR_FILE = 'app.jar'
     }
 
     stages {
@@ -14,18 +13,12 @@ pipeline {
                 script {
                     // Construir la imagen Docker
                     sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ."
-                }
-            }
-        }
-
-        stage('Extract JAR from Image') {
-            steps {
-                script {
+                    
                     // Crear un contenedor temporal a partir de la imagen construida sin iniciarlo
                     def tempContainerId = sh(script: "docker create ${IMAGE_NAME}", returnStdout: true).trim()
                     try {
-                        // Copiar el archivo JAR desde el contenedor al directorio de trabajo del Jenkins
-                        sh "docker cp ${tempContainerId}:/opt/app/${JAR_FILE} ${WORKSPACE_PATH}/${JAR_FILE}"
+                        // Copiar el archivo JAR desde el contenedor a la ruta específica en el workspace
+                        sh "docker cp ${tempContainerId}:/opt/app/*.jar ${WORKSPACE_PATH}"
                     } finally {
                         // Esperar 1 minuto antes de eliminar el contenedor temporal
                         sleep(time: 60, unit: 'SECONDS')
@@ -37,5 +30,4 @@ pipeline {
         }
     }
 }
-
 
