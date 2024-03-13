@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERFILE_PATH = '.'
-        
+        DOCKERFILE_PATH = 'docker2'
         WORKSPACE_PATH = 'var/lib/jenkins/workspace/docker'
     }
 
