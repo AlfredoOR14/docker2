@@ -24,10 +24,10 @@ pipeline {
                     def tempContainerId = sh(script: "docker create ${IMAGE_NAME}", returnStdout: true).trim()
                     try {
                         // Copiar el archivo JAR desde el contenedor a la ruta específica en el workspace
-                        sh "docker cp ${tempContainerId}:/opt/app/*.jar ${WORKSPACE_PATH}"
+                        sh "docker cp ${tempContainerId}:/opt/app/app.jar ${WORKSPACE_PATH}/app.jar"
                     } finally {
                         // Esperar 1 minuto antes de eliminar el contenedor temporal
-                        sleep(time: 60, unit: 'SECONDS')
+                        sleep(time: 10, unit: 'SECONDS')
                         // Eliminar el contenedor temporal
                         sh "docker rm ${tempContainerId}"
                     }
