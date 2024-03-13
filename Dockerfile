@@ -1,5 +1,6 @@
 FROM eclipse-temurin:17-jdk-jammy as builder
 
+RUN mkdir -p /opt/app
 WORKDIR /opt/app
 
 # Copiar los archivos de configuración de Maven
