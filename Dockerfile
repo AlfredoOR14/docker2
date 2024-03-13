@@ -1,5 +1,5 @@
 # Usa una imagen base con OpenJDK 17 para Windows
-FROM openjdk:17-windowsservercore
+FROM openjdk:17
 
 # Establece el directorio de trabajo en la imagen
 WORKDIR /opt/app
