@@ -20,7 +20,7 @@ pipeline {
             steps {
                 dir('.') {
                     script {
-                        sh "cat ~/.aws/credentials"
+                        sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 053546436729.dkr.ecr.us-east-1.amazonaws.com"
                         def ecrLogin = sh(script: "aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_IAM_PROFILE}", returnStdout: true).trim()
                         sh "echo ${ecrLogin} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
                         
