@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        registry='registry-1.docker.io'
+        registry = 'registry-1.docker.io'
         tag = "aor"
         registryCredential = 'dockerhub'
         dockerImage = ''
@@ -8,7 +8,7 @@ pipeline {
     agent any
     stages {
         stage('Generando imagen') {
-            steps{
+            steps {
                 script {
                     dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
                 }
@@ -17,18 +17,18 @@ pipeline {
         stage('Subiendo imagen al registry') {
             steps {
                 script {
-                    docker.withRegistry('https://'+registry, registryCredential ) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                    docker.withRegistry('https://' + registry, registryCredential) {
+                        dockerImage.push("alfredoor14/aor:${BUILD_NUMBER}")
+                        dockerImage.push("alfredoor14/aor:latest")
                     }
                 }
             }
         }
         stage('Limpiando el entorno') {
-            steps{
-                sh 'docker rmi $tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:latest'
+            steps {
+                sh "docker rmi ${tag}:${BUILD_NUMBER}"
+                sh "docker rmi alfredoor14/aor:${BUILD_NUMBER}"
+                sh "docker rmi alfredoor14/aor:latest"
             }
         }
     }
