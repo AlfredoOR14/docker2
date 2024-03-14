@@ -1,9 +1,9 @@
 pipeline {
-    environment {y7mZmYOsIyi6fqh9lHf6wqJ3hHeaSDm+DgSIh0Tp
-
-        registry='registry.hub.docker.com'
-        tag = "alfredoor14/jenkins-docker-demo"
-        registryCredential = 'dockerhub'
+    environment {
+        AWS_REGION = 'us-east-1' //us-west-2
+        AWS_ECR_URL_DEV = '053546436729.dkr.ecr.us-east-1.amazonaws.com' //846541480997.dkr.ecr.us-west-2.amazonaws.com
+        AWS_ECR_IMAGE = 'jenkins-docker-demo'
+        nombreTag = "${BUILD_NUMBER}"
         dockerImage = ''
     }
     agent any
@@ -11,50 +11,26 @@ pipeline {
         stage('Generando imagen') {
             steps{
                 script {
-                    dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
+                    dockerImage = docker.build("${AWS_ECR_IMAGE}:${nombreTag}")
                 }
             }   
         }
-        stage('Subiendo imagen al registry') {
+        stage('Registro de contenedor en ECR') {
             steps {
                 script {
-                    docker.withRegistry('https://'+registry, registryCredential ) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
-                    }
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
+                    sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    sh "docker rmi ${AWS_ECR_IMAGE}:${nombreTag}"
                 }
             }
         }
         stage('Limpiando el entorno') {
             steps{
-                sh 'docker rmi $tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:latest'
+                sh "docker rmi ${AWS_ECR_IMAGE}:${nombreTag}"
+                sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
             }
         }
     }
 }
-/*pipeline {
-    agent {
-        dockerfile {
-            //filename 'Dockerfile.build'
-            //dir 'build'
-            //label 'jenkins-docker-demo'
-            //registryUrl 'https://registry.hub.docker.com'
-            //registryCredentialsId 'dockerhub'
-            additionalBuildArgs  '-t "yoselalder/jenkins-docker-demo:latest"'
-        }
-    }
-    stages {
-        stage('Deploy') {
-            steps {
-                //sh 'java --version'
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                        dockerImage.push('yoselalder/jenkins-docker-demo:latest')
-                    }
-                }
-            }
-        }
-    }
-}*/
