@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        registry = 'registry-1.docker.io'
+        registry = 'registry.hub.docker.com'
         repository = 'alfredoor14/jenkins-docker-demo'
         tag = 'latest'
         registryCredential = 'dockerhub'
