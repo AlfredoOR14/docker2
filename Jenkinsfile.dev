@@ -10,7 +10,7 @@ pipeline {
     agent any
     stages {
         stage('Generando imagen') {
-            steps{
+            steps {
                 script {
                     dockerImage = docker.build("${AWS_ECR_IMAGE}:${nombreTag}")
                 }
@@ -18,24 +18,22 @@ pipeline {
         }
         stage('Registro de contenedor en ECR') {
             steps {
-                dir('.') {
-                    script {
-                        sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 053546436729.dkr.ecr.us-east-1.amazonaws.com"
-                        def ecrLogin = sh(script: "aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_IAM_PROFILE}", returnStdout: true).trim()
-                        sh "echo ${ecrLogin} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
-                        
-                        sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                        sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    }
+                script {
+                    // Iniciar sesión en ECR
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
+                    
+                    // Tag y push de la imagen al registro de ECR
+                    sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
                 }
             }
         }
         stage('Limpiando el entorno') {
-            steps{
+            steps {
+                // Eliminar las imágenes locales
                 sh "docker rmi ${AWS_ECR_IMAGE}:${nombreTag}"
                 sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
             }
         }
     }
 }
-
