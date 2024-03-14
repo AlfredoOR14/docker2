@@ -2,7 +2,7 @@ pipeline {
     environment {
         registry = 'registry-1.docker.io'
         repository = 'alfredoor14/jenkins-docker-demo'
-        tag = "latest"
+        tag = 'latest'
         registryCredential = 'dockerhub'
         dockerImage = ''
     }
@@ -11,7 +11,7 @@ pipeline {
         stage('Generando imagen') {
             steps {
                 script {
-                    dockerImage = docker.build("$repository:${tag}")
+                    dockerImage = docker.build("${repository}:${tag}")
                 }
             }
         }
@@ -19,14 +19,17 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://' + registry, registryCredential) {
-                        dockerImage.push("$repository:${tag}")
+                        dockerImage.push("${tag}")
                     }
                 }
             }
         }
         stage('Limpiando el entorno') {
             steps {
-                sh "docker rmi $repository:$tag"
+                script {
+                    sh "docker rmi ${repository}:${tag}"
+                    sh "docker rmi ${registry}/${repository}:${tag}"
+                }
             }
         }
     }
