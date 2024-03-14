@@ -10,7 +10,7 @@ COPY mvnw pom.xml ./
 RUN chmod +x mvnw
 
 # Descargar las dependencias de Maven
-RUN ./mvnw.cmd dependency:go-offline
+RUN ./mvnw dependency:go-offline
 
 # Copiar el código fuente y compilar la aplicación
 COPY ./src ./src
