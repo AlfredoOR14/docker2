@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERFILE_PATH = '.'
         IMAGE_NAME = 'demo2'
-        WORKSPACE_PATH = 'C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\docker' // Ruta al workspace en Windows
+        WORKSPACE_PATH = '/var/lib/jenkins/workspace/docker'
     }
 
     stages {
@@ -12,18 +12,18 @@ pipeline {
             steps {
                 script {
                     // Construir la imagen Docker
-                    bat "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}\\Dockerfile ."
+                    sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ."
                     
                     // Crear un contenedor temporal a partir de la imagen construida sin iniciarlo
-                    def tempContainerId = bat(script: "docker create ${IMAGE_NAME}", returnStdout: true).trim()
+                    def tempContainerId = sh(script: "docker create ${IMAGE_NAME}", returnStdout: true).trim()
                     try {
                         // Copiar el archivo JAR desde el contenedor a la ruta específica en el workspace
-                        bat "docker cp ${tempContainerId}:/opt/app/app.jar ${WORKSPACE_PATH}"
+                        sh "docker cp ${tempContainerId}:/opt/app/app.jar ${WORKSPACE_PATH}"
                     } finally {
                         // Esperar 1 minuto antes de eliminar el contenedor temporal
-                        bat "timeout /t 60" // Timeout en Windows para esperar 1 minuto
+                        sleep(time: 60, unit: 'SECONDS')
                         // Eliminar el contenedor temporal
-                        bat "docker rm ${tempContainerId}"
+                        sh "docker rm ${tempContainerId}"
                     }
                 }
             }
