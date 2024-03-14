@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        registry='registry.hub.docker.com'
+        registry='registry-1.docker.io'
         tag = "aor"
         registryCredential = 'dockerhub'
         dockerImage = ''
