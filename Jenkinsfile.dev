@@ -19,12 +19,14 @@ pipeline {
         stage('Registro de contenedor en ECR') {
             steps {
                 script {
-                    // Iniciar sesión en ECR
-                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
-                    
-                    // Tag y push de la imagen al registro de ECR
-                    sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    // Autenticación de Docker
+                    withCredentials([usernamePassword(credentialsId: 'dokerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "docker login --username ${DOCKER_USER} --password ${DOCKER_PASS}"
+                        
+                        // Tag y push de la imagen al registro de ECR
+                        sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                        sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    }
                 }
             }
         }
