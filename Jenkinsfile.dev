@@ -5,6 +5,7 @@ pipeline {
         AWS_ECR_IMAGE = 'jenkins-docker-demo'
         nombreTag = "${BUILD_NUMBER}"
         dockerImage = ''
+        AWS_IAM_PROFILE = 'luis-cuenta'
     }
     agent any
     stages {
@@ -18,7 +19,7 @@ pipeline {
         stage('Registro de contenedor en ECR') {
             steps {
                 script {
-                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
+                    sh "\$(aws ecr get-login --no-include-email --region us-east-1 --profile ${AWS_IAM_PROFILE})"
                     sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
                     sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
                     sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
