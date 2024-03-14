@@ -1,7 +1,7 @@
 pipeline {
     environment {
         registry = 'registry-1.docker.io'
-        tag = "aor"
+        tag = ""
         registryCredential = 'dockerhub'
         dockerImage = ''
     }
@@ -18,8 +18,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://' + registry, registryCredential) {
-                        dockerImage.push("alfredoor14/aor")
-                        dockerImage.push("alfredoor14/aor:latest")
+                        dockerImage.push("")
+                        dockerImage.push("latest")
                     }
                 }
             }
