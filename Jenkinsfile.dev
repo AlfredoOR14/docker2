@@ -18,12 +18,14 @@ pipeline {
         }
         stage('Registro de contenedor en ECR') {
             steps {
-                script {
-                    def ecrLogin = sh(script: "aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_IAM_PROFILE}", returnStdout: true).trim()
-                    sh "echo ${ecrLogin} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
-                    
-                    sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                dir('/aws') {
+                    script {
+                        def ecrLogin = sh(script: "aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_IAM_PROFILE}", returnStdout: true).trim()
+                        sh "echo ${ecrLogin} | docker login --username AWS --password-stdin ${AWS_ECR_URL_DEV}"
+                        
+                        sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                        sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                    }
                 }
             }
         }
