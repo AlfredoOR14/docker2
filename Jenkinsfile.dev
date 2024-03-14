@@ -1,31 +1,34 @@
 pipeline {
-    agent any
-
     environment {
-        DOCKERFILE_PATH = '.'
-        IMAGE_NAME = 'demo2'
-        WORKSPACE_PATH = '/var/lib/jenkins/workspace/docker'
+        registry='registry.hub.docker.com'
+        tag = "aor"
+        registryCredential = 'dockerhub'
+        dockerImage = ''
     }
-
+    agent any
     stages {
-        stage('Build Docker Image') {
+        stage('Generando imagen') {
+            steps{
+                script {
+                    dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
+                }
+            }
+        }
+        stage('Subiendo imagen al registry') {
             steps {
                 script {
-                    // Construir la imagen Docker
-                    sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ."
-                    
-                    // Crear un contenedor temporal a partir de la imagen construida sin iniciarlo
-                    def tempContainerId = sh(script: "docker create ${IMAGE_NAME}", returnStdout: true).trim()
-                    try {
-                        // Copiar el archivo JAR desde el contenedor a la ruta específica en el workspace
-                        sh "docker cp ${tempContainerId}:/opt/app/app.jar ${WORKSPACE_PATH}"
-                    } finally {
-                        // Esperar 1 minuto antes de eliminar el contenedor temporal
-                        sleep(time: 60, unit: 'SECONDS')
-                        // Eliminar el contenedor temporal
-                        sh "docker rm ${tempContainerId}"
+                    docker.withRegistry('https://'+registry, registryCredential ) {
+                        dockerImage.push()
+                        dockerImage.push('latest')
                     }
                 }
+            }
+        }
+        stage('Limpiando el entorno') {
+            steps{
+                sh 'docker rmi $tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:latest'
             }
         }
     }
