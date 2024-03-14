@@ -19,7 +19,7 @@ pipeline {
         stage('Registro de contenedor en ECR') {
             steps {
                 script {
-                    sh "\$(aws ecr get-login-password --region us-east-1 --profile ${AWS_IAM_PROFILE})"
+                    sh "aws ecr get-login-password --region us-east-1 --profile luis-cuenta"
                     
                     sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
                     sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
