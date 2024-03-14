@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://' + registry, registryCredential) {
-                        dockerImage.push("alfredoor14/aor:${BUILD_NUMBER}")
+                        dockerImage.push("alfredoor14/aor")
                         dockerImage.push("alfredoor14/aor:latest")
                     }
                 }
