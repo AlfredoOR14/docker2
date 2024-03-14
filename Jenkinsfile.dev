@@ -1,36 +1,59 @@
 pipeline {
     environment {
-        registry = 'registry.hub.docker.com'
-        repository = 'alfredoor14/jenkins-docker-demo2'
-        tag = 'latest'
+        registry='registry.hub.docker.com'
+        tag = "alfredoor14/jenkins-docker-demo"
         registryCredential = 'dockerhub'
         dockerImage = ''
     }
     agent any
     stages {
         stage('Generando imagen') {
-            steps {
+            steps{
                 script {
-                    dockerImage = docker.build("${repository}:${tag}")
+                    dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
                 }
-            }
+            }   
         }
         stage('Subiendo imagen al registry') {
             steps {
                 script {
-                    docker.withRegistry('https://' + registry, registryCredential) {
-                        dockerImage.push("${tag}")
+                    docker.withRegistry('https://'+registry, registryCredential ) {
+                        dockerImage.push()
+                        dockerImage.push('latest')
                     }
                 }
             }
         }
         stage('Limpiando el entorno') {
-            steps {
-                script {
-                    sh "docker rmi ${repository}:${tag}"
-                    sh "docker rmi ${registry}/${repository}:${tag}"
-                }
+            steps{
+                sh 'docker rmi $tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:latest'
             }
         }
     }
 }
+/*pipeline {
+    agent {
+        dockerfile {
+            //filename 'Dockerfile.build'
+            //dir 'build'
+            //label 'jenkins-docker-demo'
+            //registryUrl 'https://registry.hub.docker.com'
+            //registryCredentialsId 'dockerhub'
+            additionalBuildArgs  '-t "yoselalder/jenkins-docker-demo:latest"'
+        }
+    }
+    stages {
+        stage('Deploy') {
+            steps {
+                //sh 'java --version'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        dockerImage.push('yoselalder/jenkins-docker-demo:latest')
+                    }
+                }
+            }
+        }
+    }
+}*/
