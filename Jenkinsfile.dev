@@ -9,17 +9,17 @@ pipeline {
     }
     stages {
         stage('Generando imagen') {
-            steps{
+            steps {
                 script {
-                    dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
+                    dockerImage = docker.build("${registry}/${tag}:${nombreTag}")
                 }
             }
         }
         stage('Subiendo imagen a ECR') {
             steps {
                 script {
-                   withCredentials([string(credentialsId: 'AWS_KEY_ID', variable: 'AWS_KEY_ID'),
-                                 string(credentialsId: 'AWS_SECRET_KEY_ID', variable: 'AWS_SECRET_KEY_ID')]) { 
+                    withCredentials([string(credentialsId: 'AWS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'AWS_SECRET_KEY_ID', variable: 'AWS_SECRET_ACCESS_KEY')]) { 
                         sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${registry}"
                         dockerImage.push()
                         dockerImage.push("latest")
@@ -28,13 +28,11 @@ pipeline {
             }
         }
         stage('Limpiando el entorno') {
-            steps{
-                sh 'docker rmi $tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
-                sh 'docker rmi $registry/$tag:latest'
+            steps {
+                sh "docker rmi ${registry}/${tag}:${nombreTag}"
+                sh "docker rmi ${registry}/${tag}:latest"
             }
         }
     }
 }
-
 
