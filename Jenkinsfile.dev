@@ -4,6 +4,7 @@ pipeline {
         registry='053546436729.dkr.ecr.us-east-1.amazonaws.com' // Reemplaza con la URL de tu ECR
         region='us-east-1' // Reemplaza con la región de tu ECR
         nombreTag = "${BUILD_NUMBER}"
+        tag = "my-ecr-repository"
         dockerImage = ''
     }
     stages {
