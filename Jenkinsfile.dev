@@ -1,37 +1,39 @@
 pipeline {
+    agent any
     environment {
-        AWS_REGION = 'us-east-1' //us-west-2
-        AWS_ECR_URL_DEV = '053546436729.dkr.ecr.us-east-1.amazonaws.com' //846541480997.dkr.ecr.us-west-2.amazonaws.com
-        AWS_ECR_IMAGE = 'jenkins-docker-demo'
+        registry='053546436729.dkr.ecr.us-east-1.amazonaws.com' // Reemplaza con la URL de tu ECR
+        region='us-east-1' // Reemplaza con la región de tu ECR
         nombreTag = "${BUILD_NUMBER}"
         dockerImage = ''
-        AWS_IAM_PROFILE = 'default'
     }
-    agent any
     stages {
         stage('Generando imagen') {
             steps{
                 script {
-                    dockerImage = docker.build("${AWS_ECR_IMAGE}:${nombreTag}")
+                    dockerImage = docker.build(tag + ":${BUILD_NUMBER}")
                 }
-            }   
+            }
         }
-        stage('Registro de contenedor en ECR') {
+        stage('Subiendo imagen a ECR') {
             steps {
                 script {
-                    sh "aws ecr get-login-password --region us-east-1 --profile default"
-                    sh "docker tag ${AWS_ECR_IMAGE}:${nombreTag} ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    sh "docker push ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
-                    sh "docker rmi ${AWS_ECR_IMAGE}:${nombreTag}"
+                   withCredentials([string(credentialsId: 'AWS_KEY_ID', variable: 'AWS_KEY_ID'),
+                                 string(credentialsId: 'AWS_SECRET_KEY_ID', variable: 'AWS_SECRET_KEY_ID')]) { 
+                        sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${registry}"
+                        dockerImage.push()
+                        dockerImage.push("latest")
+                    }
                 }
             }
         }
         stage('Limpiando el entorno') {
             steps{
-                sh "docker rmi ${AWS_ECR_IMAGE}:${nombreTag}"
-                sh "docker rmi ${AWS_ECR_URL_DEV}/${AWS_ECR_IMAGE}:${nombreTag}"
+                sh 'docker rmi $tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:$BUILD_NUMBER'
+                sh 'docker rmi $registry/$tag:latest'
             }
         }
     }
 }
+
+
